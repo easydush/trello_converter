@@ -1,6 +1,5 @@
 # Нажми Shift+F10, чтобы запустить
-from loader import load
-from uploader import upload
+from builder import upload, head
 
 
 def print_hi():
@@ -9,5 +8,3 @@ def print_hi():
 
 if __name__ == '__main__':
     print_hi()
-    loaded = load()
-    upload(loaded)
