@@ -1,5 +1,6 @@
 # Нажми Shift+F10, чтобы запустить
 from builder import upload, head
+from data_loader import load_data
 
 
 def print_hi():
@@ -8,3 +9,4 @@ def print_hi():
 
 if __name__ == '__main__':
     print_hi()
+    load_data()

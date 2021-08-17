@@ -1,5 +1,5 @@
 class CustomField:
-    def __init__(self, id, idModel, fieldGroup, name, value, **other):
+    def __init__(self, id, idModel, fieldGroup, name, **other):
         self.id = id
         self.id_model = idModel
         self.field_group = fieldGroup
@@ -8,10 +8,9 @@ class CustomField:
 
 
 class CustomFieldValue:
-    def __init__(self, id, idCustomField, fieldGroup, value, **other):
+    def __init__(self, id, idCustomField, value=None, **other):
         self.id = id
         self.id_custom_field = idCustomField
-        self.field_group = fieldGroup
         self.value = value
         self.other = other
 
