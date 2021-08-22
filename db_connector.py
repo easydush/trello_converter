@@ -1,7 +1,7 @@
 # Импортируем библиотеку, соответствующую типу нашей базы данных
 import sqlite3
 
-from models import Card, List, CustomField, CustomFieldValue
+from models import Card, List, CustomField, CustomFieldValue, CheckList
 
 
 class DBConnector:
@@ -22,6 +22,9 @@ class DBConnector:
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS field_values
                                                    (id text NOT NULL PRIMARY KEY, value text, id_custom_field text)
                                               """)
+        self.cursor.execute("""CREATE TABLE IF NOT EXISTS check_lists
+                                                           (id text NOT NULL PRIMARY KEY, card_id text)
+                                                      """)
 
     def get_all_lists(self, board_id):
         sql = """
@@ -73,6 +76,14 @@ class DBConnector:
         self.cursor.execute(sql, (field_id,))
         return self.cursor.fetchone()
 
+    def get_check_list_from_card(self, card_id):
+        sql = """
+                  SELECT * FROM check_lists
+                  WHERE card_id = ?
+                  """
+        self.cursor.execute(sql, (card_id,))
+        return self.cursor.fetchone()
+
     def set_list(self, column: List):
         sql = """
                 INSERT OR IGNORE INTO lists(id, name, closed, board_id) VALUES (?, ?, ?, ?)
@@ -87,6 +98,14 @@ class DBConnector:
                 """
         self.cursor.execute(sql, (
             card.id, card.desc, card.name, card.closed, card.due, card.short_url, card.board_id, card.list_id))
+        self.connection.commit()
+
+    def set_check_list(self, field: CheckList):
+        sql = """
+                INSERT OR IGNORE INTO check_lists(id, card_id) 
+                VALUES (?, ?, ?, ?)
+                """
+        self.cursor.execute(sql, (field.id, field.card_id))
         self.connection.commit()
 
     def set_field(self, field: CustomField):

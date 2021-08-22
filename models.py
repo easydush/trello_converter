@@ -1,3 +1,6 @@
+from datetime import datetime as dt
+
+
 class CustomField:
     def __init__(self, id, idModel, fieldGroup, name, **other):
         self.id = id
@@ -15,8 +18,28 @@ class CustomFieldValue:
         self.other = other
 
 
+class CheckItem:
+    def __init__(self, id, idChecklist, state, name, due, **other):
+        self.id = id
+        self.check_list_id = idChecklist
+        self.state = 'Выполнено' if state == 'complete' else 'Не выполнено'
+        self.name = name
+        self.due = (dt.strptime(due, "%Y-%m-%dT%H:%M:%S.%fZ") if due else dt.today()).__format__('%d.%m.%Y г.')
+        self.other = other
+
+
+class CheckList:
+    def __init__(self, idCard, id, name, checkItems, **other):
+        self.id = id
+        self.card_id = idCard
+        self.name = name
+        self.check_items = checkItems
+        self.other = other
+
+
 class Card:
-    def __init__(self, id, closed, desc, name, due, shortUrl, idBoard, idList, customFieldItems=None, **other):
+    def __init__(self, id, closed, desc, name, due, shortUrl, idBoard, idList, idChecklists, customFieldItems=None,
+                 **other):
         self.id = id
         self.closed = closed
         self.desc = desc
@@ -26,6 +49,7 @@ class Card:
         self.board_id = idBoard
         self.list_id = idList
         self.customFieldItems = customFieldItems
+        self.check_lists = idChecklists
         self.other = other
 
 

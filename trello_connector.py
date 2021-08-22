@@ -1,8 +1,8 @@
 import logging
-
 import requests
 
-from models import Card, List, CustomField, CustomFieldValue
+import document_generator as writer
+from models import Card, List, CustomField, CustomFieldValue, CheckList, CheckItem
 
 import os
 from dotenv import load_dotenv
@@ -23,10 +23,13 @@ AUTH_PARAMS = {
 }
 logger = logging.getLogger('trello')
 
+cards = []
+cards_checklists = {}
+
 
 class TrelloConnector:
     def __init__(self):
-        pass
+        self.checklists = {}
 
     def load_cards(self):
         response = requests.request(
@@ -35,11 +38,17 @@ class TrelloConnector:
             params=AUTH_PARAMS
         )
         loaded = response.json()
-        cards = []
         for card in loaded:
-            cards.append(Card(**card))
-        print('Got cards:', len(cards))
-        return self.load_values(cards)
+            model = Card(**card)
+            cards.append(model)
+            cards_checklists[model.name] = []
+            # cards.append(model)
+            if model.check_lists:
+                print('\n', model.name)
+                self.load_checklists(model.name, model.id)
+        print('Получено карточек:', len(cards))
+        # return self.load_values(cards)
+        return cards, cards_checklists
 
     def load_lists(self):
         response = requests.request(
@@ -51,8 +60,7 @@ class TrelloConnector:
         lists = []
         for column in loaded:
             lists.append(List(**column))
-            print(column)
-        print('Got lists:', len(lists))
+        # print('Получено колонок:', len(lists))
         return lists
 
     def load_fields(self):
@@ -65,7 +73,7 @@ class TrelloConnector:
         fields = []
         for field in loaded:
             fields.append(CustomField(**field))
-        print('Got fields:', len(fields))
+        # print('Получено полей:', len(fields))
         return fields
 
     def load_values(self, cards: []):
@@ -79,6 +87,22 @@ class TrelloConnector:
             )
             loaded = response.json()
             for field in loaded:
-                print(field)
                 fields.append(CustomFieldValue(**field))
         return cards, fields
+
+    def load_checklists(self, name, card_id):
+        response = requests.request(
+            "GET",
+            f'{CARD_URL}/{card_id}/checklists',
+            params=AUTH_PARAMS
+        )
+        loaded = response.json()
+        for check_list in loaded:
+            model = CheckList(**check_list)
+            print(model.name)
+            checklists = {model.name: []}
+            for item in model.check_items:
+                model_item = CheckItem(**item)
+                checklists[model.name].append((model_item.name, model_item.due, model_item.state))
+                print(model_item.name, model_item.due, model_item.state)
+            cards_checklists[name].append(checklists)
