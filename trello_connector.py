@@ -1,7 +1,7 @@
 import logging
 import requests
 
-import document_generator as writer
+import protocol_generator as writer
 from models import Card, List, CustomField, CustomFieldValue, CheckList, CheckItem
 
 import os
@@ -19,9 +19,15 @@ API_KEY = os.getenv('API_KEY')
 API_TOKEN = os.getenv('API_TOKEN')
 AUTH_PARAMS = {
     'key': API_KEY,
-    'token': API_TOKEN
+    'token': API_TOKEN,
+    'customFieldItems': 'true'
+}
+headers = {
+    "Accept": "application/json"
 }
 logger = logging.getLogger('trello')
+
+trigger_stop = 'Приост'
 
 cards = []
 cards_checklists = {}
@@ -106,3 +112,20 @@ class TrelloConnector:
                 checklists[model.name].append((model_item.name, model_item.due, model_item.state))
                 print(model_item.name, model_item.due, model_item.state)
             cards_checklists[name].append(checklists)
+
+    def load_card(self, card=None):
+        if card:
+            print(card.customFieldItems)
+            for item in card.customFieldItems:
+                field = CustomField(**item)
+                url = f'https://api.trello.com/1/customFields/{field.id_custom_field}'
+                response = requests.request(
+                    "GET",
+                    url,
+                    params=AUTH_PARAMS,
+
+                    headers=headers
+                )
+                loaded = response.json()
+                extended_field = CustomField(**loaded)
+                print(extended_field.__dict__)
