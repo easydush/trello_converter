@@ -26,7 +26,7 @@ def generate_remark(card: Card, name=None):
         for attachment in card.attachments:
             if str(attachment).split('.')[-1] in formats:
                 attachments.append(
-                    InlineImage(doc, image_descriptor=f'board/attachments/{attachment.lower()}', width=Mm(200),
+                    InlineImage(doc, image_descriptor=f'board/attachments/{attachment.lower().replace("-","_")}', width=Mm(200),
                                 height=Mm(100)))
     context = {'name': names.get(card.label) if names.get(card.label) else card.label, 'description': card.desc,
                "due_date": card.due,
